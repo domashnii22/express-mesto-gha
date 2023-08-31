@@ -35,6 +35,9 @@ app.use("/cards", require("./routes/cards"));
 
 app.use("*", (req, res, next) => {
   next(new NotFoundError("Страница не найдена"));
+  req.user = {
+    _id: "5d8b8592978f8bd833ca8133",
+  };
 });
 
 app.use(errors());
