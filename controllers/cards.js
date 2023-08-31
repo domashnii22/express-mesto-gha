@@ -2,6 +2,7 @@ const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = require("http2").constants;
 const Card = require("../models/card");
 const BadRequestError = require("../errors/BadRequestError");
 const NotFoundError = require("../errors/NotFoundError");
+const ForbiddenError = require("../errors/ForbiddenError");
 
 module.exports.addCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -21,7 +22,7 @@ module.exports.addCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Некорректный _id"));
+        next(new BadRequestError(err.message));
       } else {
         next(err);
       }
@@ -36,15 +37,28 @@ module.exports.getCards = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new Error("NotValidCardId"))
+  Card.findById(req.params.cardId)
     .then((card) => {
-      res.status(HTTP_STATUS_OK).send(card);
+      if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError("Карточка другого пользователя");
+      }
+      Card.deleteOne(card)
+        .orFail()
+        .then(() => {
+          res.status(HTTP_STATUS_OK).send({ message: "Карточка удалена" });
+        })
+        .catch((err) => {
+          if (err.name === "CastError") {
+            next(new BadRequestError("Некорректный _id карточки"));
+          } else if (err.message === "NotValidCardId") {
+            next(new NotFoundError("Карточка с указанным _id не найдена"));
+          } else {
+            next(err);
+          }
+        });
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        next(new BadRequestError("Некорректный _id карточки"));
-      } else if (err.message === "NotValidCardId") {
+      if (err.message === "NotValidCardId") {
         next(new NotFoundError("Карточка с указанным _id не найдена"));
       } else {
         next(err);
