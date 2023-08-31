@@ -70,7 +70,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .orFail(new Error("NotValidCardId"))
     .populate(["owner", "likes"])
@@ -92,7 +92,7 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .orFail(new Error("NotValidCardId"))
     .populate(["owner", "likes"])
