@@ -25,14 +25,6 @@ app.use(limiter);
 
 mongoose.connect(DB_URL);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "64f040b3b3a602c8a1523bbb",
-  };
-
-  next();
-});
-
 app.use("/signup", require("./routes/signup"));
 app.use("/signin", require("./routes/signin"));
 
