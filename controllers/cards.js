@@ -43,7 +43,7 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError("Карточка другого пользователя");
       }
       Card.deleteOne(card)
-        .orFail()
+        .orFail(new Error("NotValidCardId"))
         .then(() => {
           res.status(HTTP_STATUS_OK).send({ message: "Карточка удалена" });
         })
@@ -58,7 +58,7 @@ module.exports.deleteCard = (req, res, next) => {
         });
     })
     .catch((err) => {
-      if (err.message === "NotValidCardId") {
+      if (err.name === "TypeError") {
         next(new NotFoundError("Карточка с указанным _id не найдена"));
       } else {
         next(err);
@@ -70,7 +70,7 @@ module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .orFail(new Error("NotValidCardId"))
     .populate(["owner", "likes"])
@@ -92,7 +92,7 @@ module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .orFail(new Error("NotValidCardId"))
     .populate(["owner", "likes"])
