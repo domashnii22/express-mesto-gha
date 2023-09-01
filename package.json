@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "lint": "npx eslint",
+    "lint": "npx eslint .",
     "lintfix": "npx eslint . --fix"
   },
   "keywords": [],
@@ -26,7 +26,6 @@
     "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.1",
-    "mongoose": "^7.4.3",
-    "validator": "^13.11.0"
+    "mongoose": "^7.4.3"
   }
 }
